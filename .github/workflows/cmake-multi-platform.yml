@@ -68,9 +68,9 @@ jobs:
         run: |
           echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-      - name: Install ninja on macOS
+      - name: Install build-tools on macOS
         if: runner.os == 'macOS'
-        run: brew install ninja
+        run: brew install autoconf ninja
 
       - name: Setup vcpkg on macOS
         if: runner.os == 'macOS'
