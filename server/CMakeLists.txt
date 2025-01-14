@@ -19,6 +19,7 @@ set_target_properties(
 )
 
 find_package(Boost ${BOOST_REQUIRED_VERSION} REQUIRED COMPONENTS program_options)
+find_package(CLI11 CONFIG REQUIRED)
 find_package(libpqxx CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
@@ -27,6 +28,7 @@ target_link_libraries(
         PRIVATE mumble_protocol
         PRIVATE Boost::boost
         PRIVATE Boost::program_options
+        PRIVATE CLI11::CLI11
         PRIVATE libpqxx::pqxx
         PRIVATE spdlog::spdlog
 )

@@ -45,6 +45,9 @@ set_target_properties(
         INTERPROCEDURAL_OPTIMIZATION ${LTO_SUPPORTED}
         VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}"
         SOVERSION 0
+        FRAMEWORK true
+        FRAMEWORK_VERSION A
+#        PUBLIC_HEADER src/server.hpp
 )
 
 target_include_directories(

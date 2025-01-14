@@ -19,7 +19,8 @@ set_target_properties(
 )
 
 find_package(Boost ${BOOST_REQUIRED_VERSION} REQUIRED COMPONENTS program_options)
-pkg_check_modules(Opus REQUIRED IMPORTED_TARGET opus)
+find_package(CLI11 CONFIG REQUIRED)
+find_package(Opus CONFIG REQUIRED)
 find_package(RtAudio CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
@@ -28,7 +29,7 @@ target_link_libraries(
         PRIVATE mumble_protocol
         PRIVATE Boost::boost
         PRIVATE Boost::program_options
-        PRIVATE PkgConfig::Opus
+        PRIVATE Opus::opus
         PRIVATE RtAudio::rtaudio
         PRIVATE spdlog::spdlog
 )

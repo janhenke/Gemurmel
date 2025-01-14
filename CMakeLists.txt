@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.29)
 project(libmumble_protocol VERSION 0.0.1)
 
 # Use libc++ instead of libstdc++ (Clang only)
@@ -22,8 +22,8 @@ include(CheckIPOSupported)
 check_ipo_supported(RESULT LTO_SUPPORTED)
 find_package(PkgConfig REQUIRED)
 
-option(BUILD_CLIENT "Build the client library" ON)
-option(BUILD_SERVER "Build the server library" ON)
+option(BUILD_CLIENT "Build the client application" ON)
+option(BUILD_SERVER "Build the server application" ON)
 option(BUILD_TEST "Build the test executables" ON)
 
 if (${BUILD_TEST})
