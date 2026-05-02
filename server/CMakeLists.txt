@@ -18,15 +18,12 @@ set_target_properties(
         CXX_EXTENSIONS OFF
 )
 
-find_package(Boost ${BOOST_REQUIRED_VERSION} REQUIRED COMPONENTS program_options)
 find_package(libpqxx CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 
 target_link_libraries(
         mumble_server
         PRIVATE mumble_protocol
-        PRIVATE Boost::boost
-        PRIVATE Boost::program_options
         PRIVATE libpqxx::pqxx
         PRIVATE spdlog::spdlog
 )

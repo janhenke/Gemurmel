@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.27)
-project(libmumble_protocol VERSION 0.0.1)
+project(Gemurmel VERSION 0.0.1)
+
+if (MSVC)
+    add_compile_options(/W4)
+else()
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
 # Use libc++ instead of libstdc++ (Clang only)
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
@@ -9,12 +15,6 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang)
 	endif ()
 endif ()
 
-# Place all output binaries into the root of the build directory
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR})
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
-
-set(BOOST_REQUIRED_VERSION 1.83)
-
 include(GNUInstallDirs)
 include(GenerateExportHeader)
 include(CheckIPOSupported)
@@ -22,11 +22,11 @@ include(CheckIPOSupported)
 check_ipo_supported(RESULT LTO_SUPPORTED)
 find_package(PkgConfig REQUIRED)
 
-option(BUILD_CLIENT "Build the client library" ON)
-option(BUILD_SERVER "Build the server library" ON)
-option(BUILD_TEST "Build the test executables" ON)
+option(GEMURMEL_BUILD_SERVER "Build the server library" ON)
+option(GEMURMEL_BUILD_TEST "Build the test executables" ON)
+option(GEMURMEL_USE_BOOST_ASIO "Use Boost.Asio instead of standalone Asio" OFF)
 
-if (${BUILD_TEST})
+if (${GEMURMEL_BUILD_TEST})
 	enable_testing()
 	find_package(Catch2 3 REQUIRED)
 	include(CTest)
@@ -34,11 +34,9 @@ if (${BUILD_TEST})
 endif ()
 
 add_subdirectory(mumble_protocol)
+add_subdirectory(gemurmel)
 
-if (${BUILD_CLIENT})
-	add_subdirectory(client)
-endif ()
-
-if (${BUILD_SERVER})
+if (${GEMURMEL_BUILD_SERVER})
 	add_subdirectory(server)
+	add_subdirectory(GemurmelServer)
 endif ()

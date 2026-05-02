@@ -56,14 +56,27 @@
     },
     {
       "name": "clang",
-      "displayName": "Clang",
-      "description": "LLVM Clang",
+      "displayName": "Clang (System)",
+      "description": "System LLVM Clang",
       "hidden": true,
       "cacheVariables": {
         "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
-        "CMAKE_C_FLAGS": "-Wall -Wextra -Wpedantic",
-        "CMAKE_CXX_FLAGS": "-Wall -Wextra -Wpedantic"
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
+    },
+    {
+      "name": "llvm-homebrew",
+      "displayName": "LLVM (Homebrew)",
+      "description": "Homebrew LLVM Clang",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "/opt/homebrew/opt/llvm/bin/clang",
+        "CMAKE_CXX_COMPILER": "/opt/homebrew/opt/llvm/bin/clang++"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
       }
     },
     {
@@ -73,9 +86,7 @@
       "hidden": true,
       "cacheVariables": {
         "CMAKE_C_COMPILER": "gcc",
-        "CMAKE_CXX_COMPILER": "g++",
-        "CMAKE_C_FLAGS": "-Wall -Wextra -Wpedantic",
-        "CMAKE_CXX_FLAGS": "-Wall -Wextra -Wpedantic"
+        "CMAKE_CXX_COMPILER": "g++"
       }
     },
     {
@@ -85,8 +96,8 @@
       "hidden": true,
       "toolset": "ClangCL",
       "cacheVariables": {
-        "CMAKE_C_FLAGS": "/W4 /utf-8",
-        "CMAKE_CXX_FLAGS": "/W4 /utf-8"
+        "CMAKE_C_FLAGS": "/utf-8",
+        "CMAKE_CXX_FLAGS": "/utf-8"
       },
       "condition": {
         "type": "equals",
@@ -106,8 +117,8 @@
       "hidden": true,
       "toolset": "v143",
       "cacheVariables": {
-        "CMAKE_C_FLAGS": "/W4 /utf-8",
-        "CMAKE_CXX_FLAGS": "/W4 /utf-8 /EHsc"
+        "CMAKE_C_FLAGS": "/utf-8",
+        "CMAKE_CXX_FLAGS": "/utf-8 /EHsc"
       },
       "condition": {
         "type": "equals",
@@ -179,6 +190,39 @@
         "type": "notEquals",
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
+      }
+    },
+    {
+      "name": "ninja-llvm-debug",
+      "displayName": "Ninja LLVM Debug (Homebrew)",
+      "inherits": [
+        "ninja",
+        "llvm-homebrew",
+        "warnings-error"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "ninja-llvm-release",
+      "displayName": "Ninja LLVM Release (Homebrew)",
+      "inherits": [
+        "ninja",
+        "llvm-homebrew"
+      ],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
       }
     },
     {
@@ -264,7 +308,7 @@
       "name": "ninja-clang-release",
       "displayName": "Ninja Clang Release",
       "configurePreset": "ninja-clang-release",
-      "configuration": "Debug",
+      "configuration": "Release",
       "condition": {
         "type": "notEquals",
         "lhs": "${hostSystemName}",
@@ -286,11 +330,33 @@
       "name": "ninja-gcc-release",
       "displayName": "Ninja GCC Release",
       "configurePreset": "ninja-gcc-release",
-      "configuration": "Debug",
+      "configuration": "Release",
       "condition": {
         "type": "notEquals",
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
+      }
+    },
+    {
+      "name": "ninja-llvm-debug",
+      "displayName": "Ninja LLVM Debug (Homebrew)",
+      "configurePreset": "ninja-llvm-debug",
+      "configuration": "Debug",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "ninja-llvm-release",
+      "displayName": "Ninja LLVM Release (Homebrew)",
+      "configurePreset": "ninja-llvm-release",
+      "configuration": "Release",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
       }
     },
     {
@@ -307,7 +373,7 @@
     {
       "name": "msbuild-msvc-release",
       "displayName": "MSVC Release",
-      "configurePreset": "msbuild-msvc-debug",
+      "configurePreset": "msbuild-msvc-release",
       "configuration": "Release",
       "condition": {
         "type": "equals",
@@ -329,13 +395,81 @@
     {
       "name": "msbuild-clang-cl-release",
       "displayName": "ClangCL Release",
-      "configurePreset": "msbuild-clang-cl-debug",
+      "configurePreset": "msbuild-clang-cl-release",
       "configuration": "Release",
       "condition": {
         "type": "equals",
         "lhs": "${hostSystemName}",
         "rhs": "Windows"
       }
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "ninja-clang-debug",
+      "displayName": "Ninja Clang Debug",
+      "configurePreset": "ninja-clang-debug",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": false
+      }
+    },
+    {
+      "name": "ninja-clang-release",
+      "displayName": "Ninja Clang Release",
+      "configurePreset": "ninja-clang-release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "ninja-llvm-debug",
+      "displayName": "Ninja LLVM Debug (Homebrew)",
+      "configurePreset": "ninja-llvm-debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "ninja-clang-debug",
+      "displayName": "Ninja Clang Debug Workflow",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ninja-clang-debug"
+        },
+        {
+          "type": "build",
+          "name": "ninja-clang-debug"
+        },
+        {
+          "type": "test",
+          "name": "ninja-clang-debug"
+        }
+      ]
+    },
+    {
+      "name": "ninja-llvm-debug",
+      "displayName": "Ninja LLVM Debug Workflow (Homebrew)",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ninja-llvm-debug"
+        },
+        {
+          "type": "build",
+          "name": "ninja-llvm-debug"
+        },
+        {
+          "type": "test",
+          "name": "ninja-llvm-debug"
+        }
+      ]
     }
   ]
 }

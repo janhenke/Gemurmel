@@ -1,8 +1,8 @@
 //
-// Created by jan on 30.12.23.
+// Created by Jan Henke on 10.05.26.
 //
 
-#include "util.hpp"
+#include <gemurmel/detail/varint.hpp>
 
 #include <array>
 #include <bit>
@@ -10,7 +10,9 @@
 #include <cstring>
 #include <stdexcept>
 
-namespace libmumble_protocol {
+#include <gemurmel/detail/protocol.hpp>
+
+namespace gemurmel::detail {
 
 auto DecodeVariableInteger(
 	std::span<const std::byte> buffer) -> std::expected<std::tuple<std::size_t, std::int64_t>, std::u8string> {
@@ -140,4 +142,4 @@ auto EncodeVariableInteger(std::span<std::byte> buffer,
 	return offset + 9;
 }
 
-} // namespace libmumble_protocol
+}

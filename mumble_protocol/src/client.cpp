@@ -32,7 +32,7 @@ struct MumbleClient::Impl final {
 	std::array<std::byte, kMaxPacketLength> receive_buffer;
 	std::array<std::byte, kMaxPacketLength> send_buffer;
 
-	Impl(std::string_view serverName, uint16_t port, std::string_view userName, bool validateServerCertificate)
+	Impl(std::string_view serverName, uint16_t port, [[maybe_unused]] std::string_view userName, bool validateServerCertificate)
 		: tls_context(asio::ssl::context_base::tlsv13_client), tls_socket(io_context, tls_context),
 		  ping_timer(io_context), receive_buffer(), send_buffer() {
 
@@ -67,9 +67,9 @@ struct MumbleClient::Impl final {
 
 		// begin Mumble handshake protocol
 		// TODO: Replace with real values, for not these are only placeholders
-		queuePacket(MumbleVersionPacket({1, 4, 287}, "1.4.287", "Linux", "5.4.32"));
+		// queuePacket(MumbleVersionPacket({1, 4, 287}, "1.4.287", "Linux", "5.4.32"));
 
-		queuePacket(MumbleAuthenticatePacket(userName, "", {}));
+		// queuePacket(MumbleAuthenticatePacket(userName, "", {}));
 
 		io_thread = std::thread{[this] { io_context.run(); }};
 	}
@@ -88,51 +88,8 @@ struct MumbleClient::Impl final {
 		const auto bufferBegin = std::begin(receive_buffer);
 		spdlog::debug("Read {} bytes from Socket: {}", bytesTransferred, spdlog::to_hex(bufferBegin, bufferBegin + 32));
 
-		const auto [packetType, payload] = ParseNetworkBuffer(receive_buffer);
-		auto not_implemented = [&packetType]() {
-			spdlog::warn("No handler implemented for control packet type: {}",
-			             static_cast<std::underlying_type_t<enum PacketType>>(packetType));
-		};
-		switch (packetType) {
-			case PacketType::Version:
-				handleVersionPacket(payload);
-				break;
-			case PacketType::UDPTunnel:
-			case PacketType::Authenticate:
-				not_implemented();
-				break;
-			case PacketType::Ping:
-				handlePingPacket(payload);
-				break;
-			case PacketType::Reject:
-			case PacketType::ServerSync:
-			case PacketType::ChannelRemove:
-			case PacketType::ChannelState:
-			case PacketType::UserRemove:
-			case PacketType::UserState:
-			case PacketType::BanList:
-			case PacketType::TextMessage:
-			case PacketType::PermissionDenied:
-			case PacketType::ACL:
-			case PacketType::QueryUsers:
-				not_implemented();
-				break;
-			case PacketType::CryptSetup:
-				handleCryptSetupPacket(payload);
-				break;
-			case PacketType::ContextActionModify:
-			case PacketType::ContextAction:
-			case PacketType::UserList:
-			case PacketType::VoiceTarget:
-			case PacketType::PermissionQuery:
-			case PacketType::CodecVersion:
-			case PacketType::UserStats:
-			case PacketType::RequestBlob:
-			case PacketType::ServerConfig:
-			case PacketType::SuggestConfig:
-				not_implemented();
-				break;
-		}
+		const auto packet = Deserialize(receive_buffer);
+		// TODO handle packet
 
 		asio::async_read(tls_socket, asio::buffer(receive_buffer), asio::transfer_at_least(kHeaderLength),
 		                 [this](const std::error_code& error, std::size_t bytes_transferred) {
@@ -140,9 +97,9 @@ struct MumbleClient::Impl final {
 		                 });
 	}
 
-	void queuePacket(const MumbleControlPacket& packet) {
+	void queuePacket(const ControlPacket& packet) {
 
-		const std::size_t size = packet.Serialize(send_buffer);
+		const std::size_t size = Serialize(send_buffer, packet);
 
 		asio::async_write(tls_socket, asio::buffer(send_buffer, size),
 		                  [](const std::error_code& ec, std::size_t bytes_transferred) {
@@ -155,9 +112,9 @@ struct MumbleClient::Impl final {
 	}
 
 	void pingTimerCompletionHandler() {
-
-		const auto timestamp = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-		queuePacket(MumblePingPacket(timestamp));
+		MumbleProto::Ping ping;
+		ping.set_timestamp(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now()));
+		queuePacket(ping);
 
 		ping_timer.expires_after(ping_period);
 		ping_timer.async_wait([this](const std::error_code& ec) {
@@ -167,26 +124,6 @@ struct MumbleClient::Impl final {
 			}
 			pingTimerCompletionHandler();
 		});
-	}
-
-	static void handleVersionPacket(const std::span<const std::byte> payload) {
-		MumbleVersionPacket versionPacket(payload);
-
-		spdlog::debug("Received version packet: \n{}", versionPacket.DebugString());
-		spdlog::info("Server version {}.{}.{}", versionPacket.majorVersion(), versionPacket.minorVersion(),
-		             versionPacket.patchVersion());
-	}
-
-	static void handlePingPacket(const std::span<const std::byte> payload) {
-		MumblePingPacket pingPacket(payload);
-
-		spdlog::debug("Received server ping: \n{}", pingPacket.DebugString());
-	}
-
-	static void handleCryptSetupPacket(const std::span<const std::byte> payload) {
-		MumbleCryptographySetupPacket cryptographySetupPacket(payload);
-
-		spdlog::debug("Received crypt setup: \n{}", cryptographySetupPacket.DebugString());
 	}
 };
 

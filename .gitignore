@@ -15,3 +15,5 @@ CTestTestfile.cmake
 # Visual Studio project files
 .vs/
 out/
+
+.junie/
