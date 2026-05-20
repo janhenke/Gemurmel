@@ -115,7 +115,7 @@
       "displayName": "MSVC",
       "description": "Microsoft Visual C++",
       "hidden": true,
-      "toolset": "v143",
+      "toolset": "v145",
       "cacheVariables": {
         "CMAKE_C_FLAGS": "/utf-8",
         "CMAKE_CXX_FLAGS": "/utf-8 /EHsc"
